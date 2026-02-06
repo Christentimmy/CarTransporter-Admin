@@ -54,11 +54,11 @@ const menuItems = [
     icon: Users,
     url: "/admin/admins",
   },
-  {
-    title: "Settings",
-    icon: Settings,
-    url: "/admin/settings",
-  },
+  // {
+  //   title: "Settings",
+  //   icon: Settings,
+  //   url: "/admin/settings",
+  // },
 ];
 
 export const AdminLayout = () => {
