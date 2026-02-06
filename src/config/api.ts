@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
     GET_ALL_SHIPMENTS: `${API_BASE_URL}/admin/get-all-shipments`,
     GET_SHIPMENT_DETAILS: (shipmentId: string) =>
       `${API_BASE_URL}/admin/get-shipment-details/${shipmentId}`,
+    REGISTER_ADMIN: `${API_BASE_URL}/admin/register`,
+    GET_ALL_ADMINS: `${API_BASE_URL}/admin/get-all-admins`,
   },
 };
 

@@ -50,9 +50,9 @@ const menuItems = [
     url: "/admin/shipments",
   },
   {
-    title: "Requests",
-    icon: FileText,
-    url: "/admin/requests",
+    title: "Admins",
+    icon: Users,
+    url: "/admin/admins",
   },
   {
     title: "Settings",
