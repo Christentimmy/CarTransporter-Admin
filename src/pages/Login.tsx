@@ -18,7 +18,7 @@ const AdminLogin = () => {
     setError("");
     setIsLoading(true);
     try {
-      await authService.login({ identifier: email, password });
+      await authService.login({ email, password });
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");

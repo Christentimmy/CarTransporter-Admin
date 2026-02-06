@@ -6,7 +6,7 @@ import {
 } from "@/config/api";
 
 type LoginPayload = {
-  identifier: string;
+  email: string;
   password: string;
 };
 
@@ -46,6 +46,10 @@ export const authService = {
 
     storeAuthToken(token);
     return token;
+  },
+
+  isAuthenticated(): boolean {
+    return Boolean(getAuthToken());
   },
 
   logout(): void {
