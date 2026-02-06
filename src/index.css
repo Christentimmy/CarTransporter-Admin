@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BID4TOW Design System - Futuristic Dark Theme with Neon Green */
+
+@layer base {
+  :root {
+    /* Core dark backgrounds */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    /* Card surfaces - slightly elevated */
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+
+    /* Popover/dropdowns */
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary - Electric Neon Green */
+    --primary: 156 100% 50%;
+    --primary-foreground: 0 0% 4%;
+
+    /* Secondary - Darker muted green */
+    --secondary: 156 40% 15%;
+    --secondary-foreground: 156 100% 70%;
+
+    /* Muted surfaces */
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+
+    /* Accent - Bright green glow */
+    --accent: 156 100% 45%;
+    --accent-foreground: 0 0% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
+    --ring: 156 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --glow-primary: 0 100% 50% / 0.5;
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(156 100% 50%),
+      hsl(156 80% 35%)
+    );
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 6%), hsl(0 0% 2%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 8%), hsl(0 0% 5%));
+    --shadow-glow: 0 0 40px hsl(156 100% 50% / 0.15);
+    --shadow-glow-strong: 0 0 60px hsl(156 100% 50% / 0.3);
+
+    /* Sidebar - matching dark theme */
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 156 100% 50%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 156 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: "Inter", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Space Grotesk", sans-serif;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(156 100% 60%),
+      hsl(156 100% 40%)
+    );
+  }
+
+  .glow-text {
+    text-shadow: 0 0 30px hsl(156 100% 50% / 0.5);
+  }
+
+  .glow-box {
+    box-shadow:
+      0 0 40px hsl(156 100% 50% / 0.15),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  }
+
+  .glow-box-strong {
+    box-shadow:
+      0 0 60px hsl(156 100% 50% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.1);
+  }
+
+  .card-gradient {
+    background: linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 6%));
+  }
+
+  .border-glow {
+    border: 1px solid hsl(156 100% 50% / 0.3);
+  }
+
+  .neon-line {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(156 100% 50%),
+      transparent
+    );
+  }
+
+  .grid-background {
+    background-image:
+      linear-gradient(hsl(156 100% 50% / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(156 100% 50% / 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Date/datetime inputs – match site vibe (dark, primary focus) */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    color-scheme: dark;
+  }
+  input[type="date"]:focus-visible,
+  input[type="datetime-local"]:focus-visible,
+  input[type="time"]:focus-visible {
+    --tw-ring-color: hsl(156 100% 50% / 0.4);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .animate-grid-move {
+    animation: grid-move 20s linear infinite;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes grid-move {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 60px 60px;
+    }
+  }
+}
