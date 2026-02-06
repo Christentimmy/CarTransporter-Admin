@@ -3,7 +3,14 @@ const API_BASE_URL =
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: `${API_BASE_URL}/admin/login`
+    LOGIN: `${API_BASE_URL}/admin/login`,
+  },
+  ADMIN: {
+    DASHBOARD_STAT: `${API_BASE_URL}/admin/dashboard-stat`,
+    RECENT_SHIPMENTS: `${API_BASE_URL}/admin/recent-shipments`,
+    GET_ALL_USERS: `${API_BASE_URL}/admin/get-all-users`,
+    UPDATE_USER_STATUS: `${API_BASE_URL}/admin/update-user-status`,
+    GET_ALL_TRANSPORTERS: `${API_BASE_URL}/admin/get-all-transporters`,
   },
 };
 
