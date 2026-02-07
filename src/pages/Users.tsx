@@ -1,11 +1,25 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Mail, Phone, Calendar, Shield, User, History } from "lucide-react";
 
-import { usersService, type AdminUser, ALLOWED_STATUSES, type AllowedStatus } from "@/services/users_services";
+import {
+  usersService,
+  type AdminUser,
+  ALLOWED_STATUSES,
+  type AllowedStatus,
+  type UserPaymentHistoryItem,
+} from "@/services/users_services";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -21,13 +35,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const getStatusVariant = (status?: string) => {
   const s = (status || "").toLowerCase();
@@ -49,6 +56,7 @@ const AdminUsers = () => {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -64,7 +72,11 @@ const AdminUsers = () => {
     mutationFn: ({ userId, status }: { userId: string; status: AllowedStatus }) =>
       usersService.updateUserStatus(userId, status),
     onSuccess: () => {
+      setSelectedUser(null);
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+    onError: (err) => {
+      console.error("Failed to update user status:", err);
     },
   });
 
@@ -80,6 +92,36 @@ const AdminUsers = () => {
       return haystack.includes(q);
     });
   }, [users, query, roleFilter]);
+
+  const paymentHistoryQuery = useQuery({
+    queryKey: ["admin", "user-payment-history", selectedUser?._id],
+    queryFn: () => usersService.getUserPaymentHistory(selectedUser!._id),
+    enabled: Boolean(showPaymentHistory && selectedUser?._id),
+  });
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+
+  const paymentHistoryTotals = useMemo(() => {
+    const list = Array.isArray(paymentHistoryQuery.data) ? paymentHistoryQuery.data : [];
+    return list.reduce(
+      (acc, item) => {
+        acc.count += 1;
+        acc.bidAmount += item.bidAmount || 0;
+        acc.totalCharge += item.totalChargeAmount || 0;
+        acc.shipperFee += item.shipperFeeAmount || 0;
+        acc.transporterFee += item.transporterFeeAmount || 0;
+        return acc;
+      },
+      {
+        count: 0,
+        bidAmount: 0,
+        totalCharge: 0,
+        shipperFee: 0,
+        transporterFee: 0,
+      }
+    );
+  }, [paymentHistoryQuery.data]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -194,7 +236,7 @@ const AdminUsers = () => {
                   </TableRow>
                 ) : (
                   filteredUsers.map((u) => (
-                    <TableRow key={u._id}>
+                    <TableRow key={u._id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedUser(u)}>
                       <TableCell className="font-medium">
                         <div className="min-w-0">
                           <div className="truncate">{displayName(u)}</div>
@@ -214,7 +256,7 @@ const AdminUsers = () => {
                           }}
                           disabled={updateStatusMutation.isPending}
                         >
-                          <SelectTrigger className="w-28 h-7 text-xs">
+                          <SelectTrigger className="w-28 h-7 text-xs" onClick={(e) => e.stopPropagation()}>
                             <SelectValue placeholder="Change" />
                           </SelectTrigger>
                           <SelectContent>
@@ -265,14 +307,6 @@ const AdminUsers = () => {
                 <div className="text-sm break-all">{selectedUser.phone_number || "-"}</div>
               </div>
               <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Company</div>
-                <div className="text-sm break-all">{selectedUser.company_name || "-"}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Balance</div>
-                <div className="text-sm">{typeof selectedUser.balance === "number" ? selectedUser.balance : "-"}</div>
-              </div>
-              <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">Email Verified</div>
                 <div className="text-sm">{selectedUser.is_email_verified ? "Yes" : "No"}</div>
               </div>
@@ -280,22 +314,127 @@ const AdminUsers = () => {
                 <div className="text-xs text-muted-foreground">Phone Verified</div>
                 <div className="text-sm">{selectedUser.is_phone_verified ? "Yes" : "No"}</div>
               </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Business Address</div>
-                <div className="text-sm break-words">{selectedUser.business_address || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Region</div>
-                <pre className="text-xs bg-muted/50 rounded-md p-3 max-h-48 overflow-auto">{JSON.stringify(selectedUser.region ?? null, null, 2)}</pre>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Payment Methods</div>
-                <pre className="text-xs bg-muted/50 rounded-md p-3 max-h-56 overflow-auto">
-                  {JSON.stringify(selectedUser.paymentMethod ?? [], null, 2)}
-                </pre>
+              <div className="space-y-1 sm:col-span-2 flex items-center justify-between">
+                <div className="text-xs text-muted-foreground">Actions</div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowPaymentHistory(true)}
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    View Payment History
+                  </Button>
+                </div>
               </div>
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showPaymentHistory}
+        onOpenChange={(open) => {
+          if (!open) setShowPaymentHistory(false);
+        }}
+      >
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl sm:w-full max-h-[85vh] overflow-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Payment History</DialogTitle>
+            <DialogDescription>
+              {selectedUser ? `${displayName(selectedUser)} • ${selectedUser.email}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {paymentHistoryQuery.isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+            </div>
+          ) : paymentHistoryQuery.error ? (
+            <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+              {paymentHistoryQuery.error instanceof Error
+                ? paymentHistoryQuery.error.message
+                : "Failed to fetch payment history"}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Transactions</div>
+                    <div className="text-lg font-semibold">{paymentHistoryTotals.count}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Total Charged</div>
+                    <div className="text-lg font-semibold">{formatCurrency(paymentHistoryTotals.totalCharge)}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Bid Amount</TableHead>
+                      <TableHead>Shipper Fee</TableHead>
+                      <TableHead>Total Charged</TableHead>
+                      <TableHead>Square Status</TableHead>
+                      <TableHead>Escrow</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(paymentHistoryQuery.data || []).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                          No payment history
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      (paymentHistoryQuery.data as UserPaymentHistoryItem[]).map((p) => (
+                        <TableRow key={p._id}>
+                          <TableCell className="whitespace-nowrap">
+                            {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {formatCurrency(p.bidAmount || 0)}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {formatCurrency(p.shipperFeeAmount || 0)}
+                            <span className="text-xs text-muted-foreground"> ({p.shipperFeePercent || 0}%)</span>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium">
+                            {formatCurrency(p.totalChargeAmount || 0)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                p.squarePaymentStatus === "COMPLETED"
+                                  ? "default"
+                                  : p.squarePaymentStatus === "APPROVED"
+                                    ? "secondary"
+                                    : "outline"
+                              }
+                            >
+                              {p.squarePaymentStatus || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={p.escrowStatus === "CAPTURED" ? "default" : "secondary"}>
+                              {p.escrowStatus || "-"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

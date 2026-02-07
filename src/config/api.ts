@@ -18,6 +18,10 @@ export const API_ENDPOINTS = {
     GET_ALL_ADMINS: `${API_BASE_URL}/admin/get-all-admins`,
     GET_ALL_WITHDRAWAL_REQUESTS: `${API_BASE_URL}/admin/get-all-withdrawal-requests`,
     UPDATE_WITHDRAWAL_STATUS: `${API_BASE_URL}/admin/update-withdrawal-request-status`,
+    GET_USER_PAYMENT_HISTORY: (userId: string) =>
+      `${API_BASE_URL}/admin/get-user-payment-history/${userId}`,
+    GET_TRANSPORTER_WITHDRAW_HISTORY: (userId: string) =>
+      `${API_BASE_URL}/admin/get-transporter-withdraw-history/${userId}`,
   },
 };
 

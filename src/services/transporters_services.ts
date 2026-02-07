@@ -17,6 +17,29 @@ export type AdminTransporter = {
   __v?: number;
 };
 
+export type TransporterWithdrawPaymentMethod = {
+  name?: string;
+  type?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  bankName?: string;
+};
+
+export type TransporterWithdrawHistoryItem = {
+  _id: string;
+  user: string;
+  amount: number;
+  status: string;
+  paymentMethod?: TransporterWithdrawPaymentMethod;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type GetTransporterWithdrawHistoryResponse = {
+  message?: string;
+  data: TransporterWithdrawHistoryItem[];
+};
+
 type GetAllTransportersResponse = {
   message?: string;
   data: AdminTransporter[];
@@ -36,6 +59,33 @@ export const transportersService = {
 
     if (!res.ok) {
       const message = (data as any)?.message || "Failed to fetch transporters";
+      throw new Error(message);
+    }
+
+    return Array.isArray(data.data) ? data.data : [];
+  },
+
+  async getTransporterWithdrawHistory(
+    userId: string,
+  ): Promise<TransporterWithdrawHistoryItem[]> {
+    if (!userId) throw new Error("userId is required");
+
+    const res = await fetch(
+      API_ENDPOINTS.ADMIN.GET_TRANSPORTER_WITHDRAW_HISTORY(userId),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(getAuthHeader() as Record<string, string>),
+        },
+      },
+    );
+
+    const data = (await res.json()) as GetTransporterWithdrawHistoryResponse;
+
+    if (!res.ok) {
+      const message =
+        (data as any)?.message || "Failed to fetch withdrawal history";
       throw new Error(message);
     }
 

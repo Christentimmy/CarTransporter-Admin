@@ -1,11 +1,21 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, History, Wallet } from "lucide-react";
 
-import { transportersService, type AdminTransporter } from "@/services/transporters_services";
-import { usersService, ALLOWED_STATUSES, type AllowedStatus } from "@/services/users_services";
+import {
+  transportersService,
+  type AdminTransporter,
+  type TransporterWithdrawHistoryItem,
+} from "@/services/transporters_services";
+import {
+  usersService,
+  ALLOWED_STATUSES,
+  type AllowedStatus,
+  type UserPaymentHistoryItem,
+} from "@/services/users_services";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -67,6 +77,8 @@ const AdminTransporters = () => {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedTransporter, setSelectedTransporter] = useState<AdminTransporter | null>(null);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+  const [showWithdrawHistory, setShowWithdrawHistory] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -98,6 +110,78 @@ const AdminTransporters = () => {
       return haystack.includes(q);
     });
   }, [transporters, query, roleFilter]);
+
+  const paymentHistoryQuery = useQuery({
+    queryKey: ["admin", "transporter-payment-history", selectedTransporter?._id],
+    queryFn: () => usersService.getUserPaymentHistory(selectedTransporter!._id),
+    enabled: Boolean(showPaymentHistory && selectedTransporter?._id),
+  });
+
+  const withdrawHistoryQuery = useQuery({
+    queryKey: ["admin", "transporter-withdraw-history", selectedTransporter?._id],
+    queryFn: () => transportersService.getTransporterWithdrawHistory(selectedTransporter!._id),
+    enabled: Boolean(showWithdrawHistory && selectedTransporter?._id),
+  });
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+
+  const paymentHistoryTotals = useMemo(() => {
+    const list = Array.isArray(paymentHistoryQuery.data) ? paymentHistoryQuery.data : [];
+    return list.reduce(
+      (acc, item) => {
+        acc.count += 1;
+        const payoutAmount = item.transporterPayoutAmount || 0;
+        const status = (item.payoutStatus || "").toUpperCase();
+        if (status === "PAID") {
+          acc.paidCount += 1;
+          acc.paidAmount += payoutAmount;
+        } else if (status === "PENDING") {
+          acc.pendingCount += 1;
+          acc.pendingAmount += payoutAmount;
+        }
+        return acc;
+      },
+      {
+        count: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        paidAmount: 0,
+        pendingAmount: 0,
+      }
+    );
+  }, [paymentHistoryQuery.data]);
+
+  const withdrawHistoryTotals = useMemo(() => {
+    const list = Array.isArray(withdrawHistoryQuery.data) ? withdrawHistoryQuery.data : [];
+    return list.reduce(
+      (acc, item) => {
+        const amount = item.amount || 0;
+        const status = (item.status || "").toLowerCase();
+        acc.count += 1;
+        if (status === "approved") {
+          acc.approvedCount += 1;
+          acc.approvedAmount += amount;
+        } else if (status === "pending") {
+          acc.pendingCount += 1;
+          acc.pendingAmount += amount;
+        } else if (status === "rejected") {
+          acc.rejectedCount += 1;
+          acc.rejectedAmount += amount;
+        }
+        return acc;
+      },
+      {
+        count: 0,
+        approvedCount: 0,
+        pendingCount: 0,
+        rejectedCount: 0,
+        approvedAmount: 0,
+        pendingAmount: 0,
+        rejectedAmount: 0,
+      }
+    );
+  }, [withdrawHistoryQuery.data]);
 
   if (isLoading) {
     return (
@@ -212,7 +296,11 @@ const AdminTransporters = () => {
                   </TableRow>
                 ) : (
                   filteredTransporters.map((t) => (
-                    <TableRow key={t._id}>
+                    <TableRow
+                      key={t._id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedTransporter(t)}
+                    >
                       <TableCell className="font-medium">
                         <div className="min-w-0">
                           <div className="truncate">{displayName(t)}</div>
@@ -232,7 +320,7 @@ const AdminTransporters = () => {
                           }}
                           disabled={updateStatusMutation.isPending}
                         >
-                          <SelectTrigger className="w-28 h-7 text-xs">
+                          <SelectTrigger className="w-28 h-7 text-xs" onClick={(e) => e.stopPropagation()}>
                             <SelectValue placeholder="Change" />
                           </SelectTrigger>
                           <SelectContent>
@@ -310,8 +398,257 @@ const AdminTransporters = () => {
                 <div className="text-xs text-muted-foreground">Region</div>
                 <pre className="text-xs bg-muted/50 rounded-md p-3 max-h-48 overflow-auto">{JSON.stringify(selectedTransporter.region ?? null, null, 2)}</pre>
               </div>
+
+              <div className="space-y-1 sm:col-span-2 flex items-center justify-between">
+                <div className="text-xs text-muted-foreground">Actions</div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setShowPaymentHistory(true)}>
+                    <History className="h-4 w-4 mr-2" />
+                    Payment History
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowWithdrawHistory(true)}
+                  >
+                    <Wallet className="h-4 w-4 mr-2" />
+                    Withdraw History
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showPaymentHistory}
+        onOpenChange={(open) => {
+          if (!open) setShowPaymentHistory(false);
+        }}
+      >
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl sm:w-full max-h-[85vh] overflow-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Payment History</DialogTitle>
+            <DialogDescription>
+              {selectedTransporter ? `${displayName(selectedTransporter)} • ${selectedTransporter.email}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {paymentHistoryQuery.isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+            </div>
+          ) : paymentHistoryQuery.error ? (
+            <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+              {paymentHistoryQuery.error instanceof Error
+                ? paymentHistoryQuery.error.message
+                : "Failed to fetch payment history"}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Transactions</div>
+                    <div className="text-lg font-semibold">{paymentHistoryTotals.count}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Paid: {paymentHistoryTotals.paidCount} • Pending: {paymentHistoryTotals.pendingCount}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Paid Out</div>
+                    <div className="text-lg font-semibold">{formatCurrency(paymentHistoryTotals.paidAmount)}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Pending Payout</div>
+                    <div className="text-lg font-semibold">{formatCurrency(paymentHistoryTotals.pendingAmount)}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Payout Amount</TableHead>
+                      <TableHead>Payout Status</TableHead>
+                      <TableHead>Payout Eligible</TableHead>
+                      <TableHead>Square Status</TableHead>
+                      <TableHead>Escrow</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(paymentHistoryQuery.data || []).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                          No payment history
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      (paymentHistoryQuery.data as UserPaymentHistoryItem[]).map((p) => (
+                        <TableRow key={p._id}>
+                          <TableCell className="whitespace-nowrap">
+                            {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {formatCurrency(p.transporterPayoutAmount || 0)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={(p.payoutStatus || "").toUpperCase() === "PAID" ? "default" : "secondary"}>
+                              {p.payoutStatus || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {p.payoutEligibleAt ? new Date(p.payoutEligibleAt).toLocaleDateString() : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                p.squarePaymentStatus === "COMPLETED"
+                                  ? "default"
+                                  : p.squarePaymentStatus === "APPROVED"
+                                    ? "secondary"
+                                    : "outline"
+                              }
+                            >
+                              {p.squarePaymentStatus || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={p.escrowStatus === "CAPTURED" ? "default" : "secondary"}>
+                              {p.escrowStatus || "-"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showWithdrawHistory}
+        onOpenChange={(open) => {
+          if (!open) setShowWithdrawHistory(false);
+        }}
+      >
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl sm:w-full max-h-[85vh] overflow-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Withdraw History</DialogTitle>
+            <DialogDescription>
+              {selectedTransporter ? `${displayName(selectedTransporter)} • ${selectedTransporter.email}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {withdrawHistoryQuery.isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
+            </div>
+          ) : withdrawHistoryQuery.error ? (
+            <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+              {withdrawHistoryQuery.error instanceof Error
+                ? withdrawHistoryQuery.error.message
+                : "Failed to fetch withdraw history"}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Requests</div>
+                    <div className="text-lg font-semibold">{withdrawHistoryTotals.count}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Approved: {withdrawHistoryTotals.approvedCount} • Pending: {withdrawHistoryTotals.pendingCount}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Approved Amount</div>
+                    <div className="text-lg font-semibold">{formatCurrency(withdrawHistoryTotals.approvedAmount)}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="text-xs text-muted-foreground">Pending Amount</div>
+                    <div className="text-lg font-semibold">{formatCurrency(withdrawHistoryTotals.pendingAmount)}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead>Account</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(withdrawHistoryQuery.data || []).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          No withdraw history
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      (withdrawHistoryQuery.data as TransporterWithdrawHistoryItem[]).map((w) => {
+                        const status = (w.status || "").toLowerCase();
+                        const methodType = w.paymentMethod?.type || "-";
+                        const bankName = w.paymentMethod?.bankName || w.paymentMethod?.name || "-";
+                        const accountNumber = w.paymentMethod?.accountNumber || "";
+                        const maskedAccount = accountNumber
+                          ? `•••• ${accountNumber.slice(-4)}`
+                          : "-";
+
+                        return (
+                          <TableRow key={w._id}>
+                            <TableCell className="whitespace-nowrap">
+                              {w.createdAt ? new Date(w.createdAt).toLocaleDateString() : "-"}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap font-medium">{formatCurrency(w.amount || 0)}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  status === "approved"
+                                    ? "default"
+                                    : status === "pending"
+                                      ? "secondary"
+                                      : status === "rejected"
+                                        ? "destructive"
+                                        : "outline"
+                                }
+                              >
+                                {w.status || "-"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <div className="text-sm">{bankName}</div>
+                              <div className="text-xs text-muted-foreground">{methodType}</div>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{maskedAccount}</TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
