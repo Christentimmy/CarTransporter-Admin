@@ -18,12 +18,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
+  Home,
   Users,
   Truck,
   Package,
-  FileText,
-  Settings,
+  CreditCard,
+  LayoutDashboard,
   LogOut,
 } from "lucide-react";
 import { authService } from "@/services/auth_services";
@@ -53,6 +53,11 @@ const menuItems = [
     title: "Admins",
     icon: Users,
     url: "/admin/admins",
+  },
+  {
+    title: "Payments",
+    icon: CreditCard,
+    url: "/admin/payments",
   },
   // {
   //   title: "Settings",
@@ -131,7 +136,7 @@ const AdminLayoutContent = () => {
                   navigate("/admin/login", { replace: true });
                 }}
               >
-                  <LogOut />
+                  <LogOut className="h-4 w-4" />
                   <span>Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
       `${API_BASE_URL}/admin/get-shipment-details/${shipmentId}`,
     REGISTER_ADMIN: `${API_BASE_URL}/admin/register`,
     GET_ALL_ADMINS: `${API_BASE_URL}/admin/get-all-admins`,
+    GET_ALL_WITHDRAWAL_REQUESTS: `${API_BASE_URL}/admin/get-all-withdrawal-requests`,
+    UPDATE_WITHDRAWAL_STATUS: `${API_BASE_URL}/admin/update-withdrawal-request-status`,
   },
 };
 
