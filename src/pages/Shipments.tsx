@@ -26,21 +26,43 @@ const getStatusVariant = (status?: ShipmentStatus) => {
   if (!status) return "outline";
   switch (status) {
     case "DRAFT":
-      return "secondary";
+      return "outline";
     case "LIVE":
-      return "default";
+      return "secondary";
     case "ENDED":
     case "COMPLETED":
       return "default";
     case "ASSIGNED":
     case "IN_TRANSIT":
     case "DELIVERED":
-      return "default";
+      return "secondary";
     case "DISPUTED":
     case "CANCELLED":
       return "destructive";
     default:
       return "outline";
+  }
+};
+
+const getStatusColor = (status?: ShipmentStatus) => {
+  if (!status) return "bg-gray-100 text-gray-800 border-gray-200";
+  switch (status) {
+    case "ENDED":
+    case "COMPLETED":
+      return "bg-red-600 text-white border-red-700";
+    case "ASSIGNED":
+    case "IN_TRANSIT":
+    case "DELIVERED":
+      return "bg-green-600 text-white border-green-700";
+    case "LIVE":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "DRAFT":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "DISPUTED":
+    case "CANCELLED":
+      return "bg-gray-100 text-gray-800 border-gray-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 };
 
@@ -160,9 +182,9 @@ const AdminShipments = () => {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="font-mono text-xs text-muted-foreground truncate">{s._id}</div>
-                        <Badge variant={getStatusVariant(s.status) as any} className="text-xs mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(s.status)}`}>
                           {s.status}
-                        </Badge>
+                        </span>
                       </div>
                       <div className="text-xs text-muted-foreground whitespace-nowrap">
                         {formatDate(s.createdAt)}
