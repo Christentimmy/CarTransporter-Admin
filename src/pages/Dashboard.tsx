@@ -1,7 +1,56 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Users, Truck, Package, DollarSign, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "@/services/dashboard_services";
+
+const getStatusVariant = (status?: string) => {
+  const s = (status || "").toLowerCase();
+  switch (s) {
+    case "ended":
+    case "completed":
+      return "default";
+    case "assigned":
+    case "accepted":
+      return "secondary";
+    case "in_transit":
+    case "in_progress":
+      return "outline";
+    case "pending":
+    case "created":
+      return "destructive";
+    default:
+      return "outline";
+  }
+};
+
+const getStatusColor = (status?: string) => {
+  const s = (status || "").toLowerCase();
+  switch (s) {
+    case "ended":
+    case "completed":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "assigned":
+    case "accepted":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "in_transit":
+    case "in_progress":
+      return "bg-indigo-100 text-indigo-800 border-indigo-200";
+    case "pending":
+    case "created":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+
+const truncateLocation = (address?: string) => {
+  if (!address) return "-";
+  const parts = address.split(",");
+  if (parts.length >= 2) return `${parts[0].trim()}, ${parts[1].trim()}`;
+  if (parts.length === 1) return parts[0].trim();
+  return address.trim();
+};
 
 const AdminDashboard = () => {
   const {
@@ -115,25 +164,18 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               {Array.isArray(recentShipments?.data) && recentShipments.data.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {recentShipments.data.slice(0, 5).map((s: any) => (
-                    <div
-                      key={s?._id}
-                      className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4"
-                    >
-                      <div className="min-w-0">
-                        <div className="font-medium text-sm sm:text-base leading-snug">
-                          {s?.pickupLocation?.address || "Pickup"} → {s?.deliveryLocation?.address || "Delivery"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {s?.vehicleDetails?.make ? `${s.vehicleDetails.make} ${s.vehicleDetails.model ?? ""}` : ""}
+                    <div key={s?._id} className="flex items-center justify-between gap-3 py-2 border-b last:border-b-0">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate">
+                          {truncateLocation(s?.pickupLocation?.address)} → {truncateLocation(s?.deliveryLocation?.address)}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:block sm:text-right flex-shrink-0">
-                        <div className="text-sm font-medium">{s?.status ?? ""}</div>
-                        {typeof s?.currentBid?.amount === "number" ? (
-                          <div className="text-xs text-muted-foreground">Bid: ${s.currentBid.amount}</div>
-                        ) : null}
+                      <div className="flex-shrink-0">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(s?.status)}`}>
+                          {s?.status ?? "-"}
+                        </span>
                       </div>
                     </div>
                   ))}
