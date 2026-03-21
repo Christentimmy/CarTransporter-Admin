@@ -396,7 +396,17 @@ const AdminTransporters = () => {
               </div>
               <div className="space-y-1 sm:col-span-2">
                 <div className="text-xs text-muted-foreground">Region</div>
-                <pre className="text-xs bg-muted/50 rounded-md p-3 max-h-48 overflow-auto">{JSON.stringify(selectedTransporter.region ?? null, null, 2)}</pre>
+                <div className="text-sm">
+                  {selectedTransporter.region ? (
+                    <div className="space-y-1">
+                      <div><span className="font-medium">Country:</span> {selectedTransporter.region.country || "-"}</div>
+                      <div><span className="font-medium">State:</span> {selectedTransporter.region.state || "-"}</div>
+                      <div><span className="font-medium">Postal Code:</span> {selectedTransporter.region.postalCode || "-"}</div>
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1 sm:col-span-2 flex items-center justify-between">

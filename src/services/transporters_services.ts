@@ -11,7 +11,11 @@ export type AdminTransporter = {
   status?: string;
   is_email_verified?: boolean;
   role?: string;
-  region?: unknown;
+  region?: {
+    country: string;
+    state: string;
+    postalCode: string;
+  };
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
