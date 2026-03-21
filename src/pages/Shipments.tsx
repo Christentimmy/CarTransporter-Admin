@@ -220,7 +220,7 @@ const AdminShipments = () => {
                         <div className="text-xs text-muted-foreground">No bids</div>
                       )}
                       <div className="text-xs text-muted-foreground">
-                        {s.distance} mi
+                        {s.distance} km
                       </div>
                     </div>
                   </CardContent>
@@ -426,24 +426,29 @@ const AdminShipments = () => {
               </div>
 
               {shipmentDetails.payment && (
-                <div className="space-y-1 sm:col-span-2 border-t pt-4">
+                <div className="space-y-3 sm:col-span-2 border-t pt-4">
                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <CreditCard className="h-3 w-3" /> Payment Details
                   </div>
-                  <div className="text-sm">
-                    Bid Amount: ${shipmentDetails.payment.bidAmount} | Shipper Fee: ${shipmentDetails.payment.shipperFeeAmount} | Transporter Fee: ${shipmentDetails.payment.transporterFeeAmount}
-                  </div>
-                  <div className="text-sm">
-                    Total Charged: ${shipmentDetails.payment.totalChargeAmount} | Transporter Payout: ${shipmentDetails.payment.transporterPayoutAmount}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Square Status: {shipmentDetails.payment.squarePaymentStatus} | Escrow: {shipmentDetails.payment.escrowStatus} | Payout: {shipmentDetails.payment.payoutStatus}
-                  </div>
-                  {shipmentDetails.payment.payoutEligibleAt && (
-                    <div className="text-xs text-muted-foreground">
-                      Payout Eligible: {formatDate(shipmentDetails.payment.payoutEligibleAt)}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2">
+                      <div><span className="font-medium">Bid Amount:</span> ${shipmentDetails.payment.bidAmount}</div>
+                      <div><span className="font-medium">Shipper Auction Fee (10%):</span> ${shipmentDetails.payment.shipperFeeAmount}</div>
+                      <div><span className="font-medium">Transport Service Fee (10%):</span> ${shipmentDetails.payment.transporterFeeAmount}</div>
                     </div>
-                  )}
+                    <div className="space-y-2">
+                      <div><span className="font-medium">Total Charged (tax included):</span> ${shipmentDetails.payment.totalChargeAmount}</div>
+                      <div><span className="font-medium">Transporter Payout (plus taxes):</span> ${shipmentDetails.payment.transporterPayoutAmount}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div><span className="font-medium">Square Status:</span> {shipmentDetails.payment.squarePaymentStatus}</div>
+                    <div><span className="font-medium">Escrow:</span> {shipmentDetails.payment.escrowStatus}</div>
+                    <div><span className="font-medium">Payout:</span> {shipmentDetails.payment.payoutStatus}</div>
+                    {shipmentDetails.payment.payoutEligibleAt && (
+                      <div><span className="font-medium">Payout Eligible:</span> {formatDate(shipmentDetails.payment.payoutEligibleAt)}</div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

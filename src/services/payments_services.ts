@@ -48,10 +48,22 @@ export type WithdrawalRequest = {
 type GetAllWithdrawalRequestsResponse = {
   message?: string;
   data: WithdrawalRequest[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    hasNextPage: boolean;
+  };
 };
 
 export const paymentsService = {
-  async getAllWithdrawalRequests(): Promise<WithdrawalRequest[]> {
+  async getAllWithdrawalRequests(): Promise<{
+    data: WithdrawalRequest[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      hasNextPage: boolean;
+    };
+  }> {
     const res = await fetch(API_ENDPOINTS.ADMIN.GET_ALL_WITHDRAWAL_REQUESTS, {
       method: "GET",
       headers: {
@@ -60,20 +72,20 @@ export const paymentsService = {
       },
     });
 
-    const data = (await res.json()) as GetAllWithdrawalRequestsResponse;
-
     if (!res.ok) {
-      const message =
-        (data as any)?.message || "Failed to fetch withdrawal requests";
-      throw new Error(message);
+      throw new Error(`Failed to fetch withdrawal requests: ${res.statusText}`);
     }
 
-    return Array.isArray(data.data) ? data.data : [];
+    const response: GetAllWithdrawalRequestsResponse = await res.json();
+    return {
+      data: response.data,
+      pagination: response.pagination,
+    };
   },
 
   async updateWithdrawalStatus(
     withdrawalRequestId: string,
-    status: "pending" | "approved" | "rejected",
+    status: "PENDING" | "PAID" | "CANCELLED",
   ): Promise<void> {
     const res = await fetch(API_ENDPOINTS.ADMIN.UPDATE_WITHDRAWAL_STATUS, {
       method: "POST",

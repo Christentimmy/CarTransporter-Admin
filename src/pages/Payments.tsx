@@ -30,7 +30,7 @@ const AdminPayments = () => {
   const queryClient = useQueryClient();
 
   const {
-    data: requests,
+    data: requestsData,
     isLoading,
     error,
     refetch,
@@ -39,8 +39,11 @@ const AdminPayments = () => {
     queryFn: paymentsService.getAllWithdrawalRequests,
   });
 
+  const requests = requestsData?.data || [];
+  const pagination = requestsData?.pagination;
+
   const updateStatusMutation = useMutation({
-    mutationFn: ({ requestId, status }: { requestId: string; status: "pending" | "approved" | "rejected" }) =>
+    mutationFn: ({ requestId, status }: { requestId: string; status: "PENDING" | "PAID" | "CANCELLED" }) =>
       paymentsService.updateWithdrawalStatus(requestId, status),
     onSuccess: () => {
       setSelectedRequest(null);
@@ -64,25 +67,23 @@ const AdminPayments = () => {
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "approved":
+      case "PAID":
         return "default";
-      case "rejected":
+      case "CANCELLED":
         return "destructive";
-      case "processed":
-        return "secondary";
+      case "PENDING":
       default:
-        return "outline";
+        return "secondary";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "approved":
+      case "PAID":
         return <CheckCircle className="h-3 w-3" />;
-      case "rejected":
+      case "CANCELLED":
         return <XCircle className="h-3 w-3" />;
-      case "processed":
-        return <Clock className="h-3 w-3" />;
+      case "PENDING":
       default:
         return <Clock className="h-3 w-3" />;
     }
@@ -110,10 +111,9 @@ const AdminPayments = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="processed">Processed</SelectItem>
+            <SelectItem value="PENDING">Pending</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
+            <SelectItem value="CANCELLED">Cancelled</SelectItem>
           </SelectContent>
         </Select>
         <Button onClick={() => refetch()} variant="outline" size="icon" className="h-9 w-9">
@@ -222,34 +222,8 @@ const AdminPayments = () => {
                       {getStatusIcon(selectedRequest.status)}
                       {selectedRequest.status}
                     </Badge>
-                    {selectedRequest.status === "pending" && (
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          onClick={() => updateStatusMutation.mutate({ requestId: selectedRequest._id, status: "approved" })}
-                          disabled={updateStatusMutation.isPending}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => updateStatusMutation.mutate({ requestId: selectedRequest._id, status: "rejected" })}
-                          disabled={updateStatusMutation.isPending}
-                        >
-                          Reject
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </div>
-
-                {selectedRequest.user.company_name && (
-                  <div className="space-y-1 sm:col-span-2">
-                    <div className="text-xs text-muted-foreground">Company</div>
-                    <div className="text-sm">{selectedRequest.user.company_name}</div>
-                  </div>
-                )}
 
                 {selectedRequest.user.business_address && (
                   <div className="space-y-1 sm:col-span-2">
