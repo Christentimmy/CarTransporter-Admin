@@ -349,82 +349,113 @@ const AdminTransporters = () => {
           </DialogHeader>
 
           {selectedTransporter ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Transporter ID</div>
-                <div className="text-sm font-mono break-all">{selectedTransporter._id}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Role</div>
-                <div>
-                  <Badge variant={getRoleVariant(selectedTransporter.role) as any}>{selectedTransporter.role || "-"}</Badge>
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold">{displayName(selectedTransporter)}</h2>
+                  <p className="text-sm text-muted-foreground">{selectedTransporter.email}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={getStatusVariant(selectedTransporter.status) as any} className="text-xs">
+                      {selectedTransporter.status || "-"}
+                    </Badge>
+                    <Badge variant={getRoleVariant(selectedTransporter.role) as any} className="text-xs">
+                      {selectedTransporter.role || "-"}
+                    </Badge>
+                    <Badge variant={selectedTransporter.is_email_verified ? "default" : "secondary"} className="text-xs">
+                      {selectedTransporter.is_email_verified ? "Verified" : "Unverified"}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Status</div>
-                <div>
-                  <Badge variant={getStatusVariant(selectedTransporter.status) as any}>{selectedTransporter.status || "-"}</Badge>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Email Verified</div>
-                <div>
-                  <Badge variant={selectedTransporter.is_email_verified ? "default" : "secondary"}>
-                    {selectedTransporter.is_email_verified ? "Yes" : "No"}
-                  </Badge>
-                </div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Full Name</div>
-                <div className="text-sm">{selectedTransporter.full_name || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Phone Number</div>
-                <div className="text-sm">{selectedTransporter.phone_number || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Company Name</div>
-                <div className="text-sm">{selectedTransporter.company_name || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Business Address</div>
-                <div className="text-sm">{selectedTransporter.business_address || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Tax Number</div>
-                <div className="text-sm">{selectedTransporter.tax_number || "-"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <div className="text-xs text-muted-foreground">Region</div>
-                <div className="text-sm">
-                  {selectedTransporter.region ? (
-                    <div className="space-y-1">
-                      <div><span className="font-medium">Country:</span> {selectedTransporter.region.country || "-"}</div>
-                      <div><span className="font-medium">State:</span> {selectedTransporter.region.state || "-"}</div>
-                      <div><span className="font-medium">Postal Code:</span> {selectedTransporter.region.postalCode || "-"}</div>
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-1 sm:col-span-2 flex items-center justify-between">
-                <div className="text-xs text-muted-foreground">Actions</div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button size="sm" variant="outline" onClick={() => setShowPaymentHistory(true)}>
                     <History className="h-4 w-4 mr-2" />
                     Payment History
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowWithdrawHistory(true)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => setShowWithdrawHistory(true)}>
                     <Wallet className="h-4 w-4 mr-2" />
                     Withdraw History
                   </Button>
                 </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="space-y-6">
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Personal Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Full Name</span>
+                      <span className="text-sm font-medium">{selectedTransporter.full_name || "-"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Phone Number</span>
+                      <span className="text-sm font-medium">{selectedTransporter.phone_number || "-"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Region</span>
+                      <span className="text-sm font-medium">
+                        {selectedTransporter.region 
+                          ? `${selectedTransporter.region.country || ""}${selectedTransporter.region.state ? ", " + selectedTransporter.region.state : ""}${selectedTransporter.region.postalCode ? " " + selectedTransporter.region.postalCode : ""}`.trim() 
+                          : "-"
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Information */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Business Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Company Name</span>
+                      <span className="text-sm font-medium">{selectedTransporter.company_name || "-"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Tax Number</span>
+                      <span className="text-sm font-medium font-mono">{selectedTransporter.tax_number || "-"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground">Business Address</span>
+                      <span className="text-sm font-medium">{selectedTransporter.business_address || "-"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Insurance Information - Full Width */}
+              {selectedTransporter.insurance && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Insurance Information</h3>
+                  <div className="grid gap-4 sm:grid-cols-3 bg-muted/30 p-4 rounded-lg">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground block">Policy Name</span>
+                      <span className="text-sm font-medium">{selectedTransporter.insurance.name || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground block">Policy Number</span>
+                      <span className="text-sm font-medium font-mono">{selectedTransporter.insurance.policyNumber || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground block">Expiry Date</span>
+                      <span className="text-sm font-medium">
+                        {selectedTransporter.insurance.expiryDate 
+                          ? new Date(selectedTransporter.insurance.expiryDate).toLocaleDateString()
+                          : "-"
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* System Information */}
+              <div className="text-xs text-muted-foreground space-y-1 pt-4 border-t">
+                <div>Transporter ID: <span className="font-mono">{selectedTransporter._id}</span></div>
+                <div>Created: {selectedTransporter.createdAt ? new Date(selectedTransporter.createdAt).toLocaleString() : "-"}</div>
+                <div>Updated: {selectedTransporter.updatedAt ? new Date(selectedTransporter.updatedAt).toLocaleString() : "-"}</div>
               </div>
             </div>
           ) : null}

@@ -136,6 +136,10 @@ export type ShipmentDetails = {
     updatedAt: string;
     escrowStatus?: EscrowStatus;
     lastPayment?: string;
+    disputeInfo?: {
+      issue?: string;
+      disputePhotos?: string[];
+    };
   };
   payment?: {
     _id: string;

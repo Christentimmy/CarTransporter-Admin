@@ -19,6 +19,11 @@ export type AdminTransporter = {
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
+  insurance?: {
+    expiryDate: Date;
+    name: string;
+    policyNumber: string;
+  };
 };
 
 export type TransporterWithdrawPaymentMethod = {
