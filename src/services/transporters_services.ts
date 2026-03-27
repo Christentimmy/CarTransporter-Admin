@@ -4,6 +4,7 @@ export type AdminTransporter = {
   _id: string;
   full_name?: string;
   email: string;
+  avatar?: string;
   phone_number?: string;
   company_name?: string;
   business_address?: string;
@@ -12,9 +13,10 @@ export type AdminTransporter = {
   is_email_verified?: boolean;
   role?: string;
   region?: {
-    country: string;
-    state: string;
-    postalCode: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
   };
   createdAt?: string;
   updatedAt?: string;

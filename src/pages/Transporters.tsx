@@ -353,8 +353,19 @@ const AdminTransporters = () => {
               {/* Header Section */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 bg-muted/50 rounded-lg">
                 <div className="space-y-2">
-                  <h2 className="text-lg font-semibold">{displayName(selectedTransporter)}</h2>
-                  <p className="text-sm text-muted-foreground">{selectedTransporter.email}</p>
+                  <div className="flex items-center gap-3">
+                    {selectedTransporter.avatar && (
+                      <img 
+                        src={selectedTransporter.avatar} 
+                        alt={displayName(selectedTransporter)} 
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    )}
+                    <div>
+                      <h2 className="text-lg font-semibold">{displayName(selectedTransporter)}</h2>
+                      <p className="text-sm text-muted-foreground">{selectedTransporter.email}</p>
+                    </div>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant={getStatusVariant(selectedTransporter.status) as any} className="text-xs">
                       {selectedTransporter.status || "-"}
@@ -383,43 +394,53 @@ const AdminTransporters = () => {
               <div className="space-y-6">
                 {/* Personal Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Personal Information</h3>
-                  <div className="space-y-3">
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Full Name</span>
-                      <span className="text-sm font-medium">{selectedTransporter.full_name || "-"}</span>
+                  <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Personal Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Full Name:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedTransporter.full_name || "-"}</span>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Phone Number</span>
-                      <span className="text-sm font-medium">{selectedTransporter.phone_number || "-"}</span>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Email:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedTransporter.email}</span>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Region</span>
-                      <span className="text-sm font-medium">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Phone Number:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedTransporter.phone_number || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Region:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">
                         {selectedTransporter.region 
-                          ? `${selectedTransporter.region.country || ""}${selectedTransporter.region.state ? ", " + selectedTransporter.region.state : ""}${selectedTransporter.region.postalCode ? " " + selectedTransporter.region.postalCode : ""}`.trim() 
+                          ? `${selectedTransporter.region.country || ""}${selectedTransporter.region.state ? ", " + selectedTransporter.region.state : ""}${selectedTransporter.region.city ? ", " + selectedTransporter.region.city : ""}${selectedTransporter.region.postalCode ? " " + selectedTransporter.region.postalCode : ""}`.trim() 
                           : "-"
                         }
                       </span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Email Verified:&nbsp;&nbsp;</span>
+                      <Badge variant={selectedTransporter.is_email_verified ? "default" : "secondary"} className="text-xs">
+                        {selectedTransporter.is_email_verified ? "Verified" : "Not Verified"}
+                      </Badge>
                     </div>
                   </div>
                 </div>
 
                 {/* Business Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Business Information</h3>
-                  <div className="space-y-3">
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Company Name</span>
-                      <span className="text-sm font-medium">{selectedTransporter.company_name || "-"}</span>
+                  <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Business Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Company Name:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedTransporter.company_name || "-"}</span>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Tax Number</span>
-                      <span className="text-sm font-medium font-mono">{selectedTransporter.tax_number || "-"}</span>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Business Address:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedTransporter.business_address || "-"}</span>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">Business Address</span>
-                      <span className="text-sm font-medium">{selectedTransporter.business_address || "-"}</span>
+                    <div className="space-y-1 sm:col-span-2">
+                      <span className="text-xs text-muted-foreground">Tax Number:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white font-mono">{selectedTransporter.tax_number || "-"}</span>
                     </div>
                   </div>
                 </div>
