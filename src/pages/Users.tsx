@@ -285,43 +285,151 @@ const AdminUsers = () => {
           </DialogHeader>
 
           {selectedUser ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">User ID</div>
-                <div className="text-sm font-mono break-all">{selectedUser._id}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Role</div>
-                <div>
-                  <Badge variant={getRoleVariant(selectedUser.role) as any}>{selectedUser.role || "-"}</Badge>
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    {selectedUser.avatar && (
+                      <img 
+                        src={selectedUser.avatar} 
+                        alt={displayName(selectedUser)} 
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    )}
+                    <div>
+                      <h2 className="text-lg font-semibold">{displayName(selectedUser)}</h2>
+                      <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={getRoleVariant(selectedUser.role) as any} className="text-xs">
+                      {selectedUser.role || "-"}
+                    </Badge>
+                    <Badge variant={getStatusVariant(selectedUser.status) as any} className="text-xs">
+                      {selectedUser.status || "-"}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {selectedUser.user_type || "-"}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="text-right space-y-1">
+                  <div className="text-sm font-medium">
+                    Balance: ${selectedUser.balance ?? 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Account Balance</div>
                 </div>
               </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Status</div>
-                <div>
-                  <Badge variant={getStatusVariant(selectedUser.status) as any}>{selectedUser.status || "-"}</Badge>
+
+              {/* Main Content Grid */}
+              <div className="space-y-6">
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Personal Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Full Name:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedUser.full_name || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Email:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedUser.email}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Phone Number:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedUser.phone_number || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">User Type:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium text-white">{selectedUser.user_type || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Email Verified:&nbsp;&nbsp;</span>
+                      <Badge variant={selectedUser.is_email_verified ? "default" : "secondary"} className="text-xs">
+                        {selectedUser.is_email_verified ? "Verified" : "Not Verified"}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Phone Verified:&nbsp;&nbsp;</span>
+                      <Badge variant={selectedUser.is_phone_verified ? "default" : "secondary"} className="text-xs">
+                        {selectedUser.is_phone_verified ? "Verified" : "Not Verified"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Information */}
+                {selectedUser.company_name && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Business Information</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <span className="text-xs text-muted-foreground">Company Name:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.company_name}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-muted-foreground">Business Address:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.business_address || "-"}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Location Information */}
+                {selectedUser.region && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Location Information</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <span className="text-xs text-muted-foreground">Country:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.region.country || "-"}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-muted-foreground">State:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.region.state || "-"}</span>
+                      </div>
+                      <div className="space-y-1 sm:col-span-2">
+                        <span className="text-xs text-muted-foreground">City:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.region.city || "-"}</span>
+                      </div>
+                      <div className="space-y-1 sm:col-span-2">
+                        <span className="text-xs text-muted-foreground">Postal Code:&nbsp;&nbsp;</span>
+                        <span className="text-sm font-medium">{selectedUser.region.postalCode || "-"}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* System Information */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">System Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">User ID:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-mono">{selectedUser._id}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Square Customer ID:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-mono">{selectedUser.squareCustomerId || "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Created:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium">{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : "-"}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Updated:&nbsp;&nbsp;</span>
+                      <span className="text-sm font-medium">{selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString() : "-"}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Phone</div>
-                <div className="text-sm break-all">{selectedUser.phone_number || "-"}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Email Verified</div>
-                <div className="text-sm">{selectedUser.is_email_verified ? "Yes" : "No"}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Phone Verified</div>
-                <div className="text-sm">{selectedUser.is_phone_verified ? "Yes" : "No"}</div>
-              </div>
-              <div className="space-y-1 sm:col-span-2 flex items-center justify-between">
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-4 border-t">
                 <div className="text-xs text-muted-foreground">Actions</div>
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowPaymentHistory(true)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => setShowPaymentHistory(true)}>
                     <History className="h-4 w-4 mr-2" />
                     View Payment History
                   </Button>

@@ -12,6 +12,8 @@ export type AdminUser = {
   _id: string;
   full_name?: string;
   email: string;
+  avatar?: string;
+  user_type: string;
   phone_number?: string;
   company_name?: string;
   business_address?: string;
@@ -23,7 +25,12 @@ export type AdminUser = {
   balance?: number;
   role?: string;
   paymentMethod?: unknown[];
-  region?: unknown;
+  region?: {
+    country: string;
+    city: string;
+    state: string;
+    postalCode: string;
+  };
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
