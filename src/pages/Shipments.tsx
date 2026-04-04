@@ -302,12 +302,12 @@ const AdminShipments = () => {
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(shipmentDetails.shipment.status)}`}>
                       {shipmentDetails.shipment.status}
                     </span>
-                    <Badge variant="outline" className="text-xs">
+                    {/* <Badge variant="outline" className="text-xs">
                       {shipmentDetails.shipment.distance} km
                     </Badge>
                     <Badge variant="outline" className="text-xs">
                       {shipmentDetails.shipment.estimatedTime}h
-                    </Badge>
+                    </Badge> */}
                   </div>
                 </div>
                 <div className="text-right space-y-1">
@@ -493,13 +493,25 @@ const AdminShipments = () => {
                           <span className="text-sm font-medium">${shipmentDetails.payment.bidAmount}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm">Shipper Fee (10%):</span>
+                          <span className="text-sm">Shipper Fee ({shipmentDetails.payment.shipperFeePercent}%):</span>
                           <span className="text-sm font-medium">${shipmentDetails.payment.shipperFeeAmount}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm">Transport Fee (10%):</span>
+                          <span className="text-sm">Transport Fee ({shipmentDetails.payment.transporterFeePercent}%):</span>
                           <span className="text-sm font-medium">${shipmentDetails.payment.transporterFeeAmount}</span>
                         </div>
+                        {shipmentDetails.payment.gstTaxePercent !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-sm">GST Tax ({shipmentDetails.payment.gstTaxePercent}%):</span>
+                            <span className="text-sm font-medium">${shipmentDetails.payment.gstTaxeAmount}</span>
+                          </div>
+                        )}
+                        {shipmentDetails.payment.qstTaxePercent !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-sm">QST Tax ({shipmentDetails.payment.qstTaxePercent}%):</span>
+                            <span className="text-sm font-medium">${shipmentDetails.payment.qstTaxeAmount}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between">
@@ -528,13 +540,36 @@ const AdminShipments = () => {
                       {shipmentDetails.payment.payoutEligibleAt && (
                         <div className="flex justify-between">
                           <span>Payout Eligible:</span>
-                          <span className="font-medium">{formatDate(shipmentDetails.payment.payoutEligibleAt)}</span>
+                          <span className="font-medium">{new Date(shipmentDetails.payment.payoutEligibleAt).toLocaleDateString()}</span>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Distance Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-muted-foreground border-b pb-2">Distance Information</h3>
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Distance:</span>
+                    <span className="text-sm font-medium">{shipmentDetails.shipment.distance} Km</span>
+                  </div>
+                  {shipmentDetails.shipment.auctionStartedAt && (
+                    <div className="flex justify-between">
+                      <span className="text-sm">Auction Start:</span>
+                      <span className="text-sm font-medium">{new Date(shipmentDetails.shipment.auctionStartedAt).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {shipmentDetails.shipment.auctionEndsAt && (
+                    <div className="flex justify-between">
+                      <span className="text-sm">Auction End:</span>
+                      <span className="text-sm font-medium">{new Date(shipmentDetails.shipment.auctionEndsAt).toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* System Information */}
               <div className="text-xs text-muted-foreground space-y-1 pt-4 border-t">

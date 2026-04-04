@@ -128,8 +128,8 @@ export type ShipmentDetails = {
     deliveryDeadline: string;
     photos: string[];
     auctionDuration: number;
-    auctionStartTime?: string;
-    auctionEndTime?: string;
+    auctionStartedAt?: string;
+    auctionEndsAt?: string;
     status: ShipmentStatus;
     currentBid?: CurrentBid;
     createdAt: string;
@@ -159,6 +159,12 @@ export type ShipmentDetails = {
     escrowStatus: string;
     payoutStatus: string;
     payoutEligibleAt?: string;
+
+    gstTaxePercent: number,
+    qstTaxePercent: number,
+    gstTaxeAmount: number,
+    qstTaxeAmount: number,
+
     createdAt: string;
     updatedAt: string;
     capturedAt?: string;
