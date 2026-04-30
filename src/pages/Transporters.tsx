@@ -233,10 +233,14 @@ const AdminTransporters = () => {
               </div>
             ) : (
               filteredTransporters.map((t) => (
-                <button
+                <div
                   key={t._id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedTransporter(t)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") setSelectedTransporter(t);
+                  }}
                   className="w-full text-left"
                 >
                   <Card className="hover:bg-muted/50 transition-colors">
@@ -272,7 +276,7 @@ const AdminTransporters = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </button>
+                </div>
               ))
             )}
           </div>

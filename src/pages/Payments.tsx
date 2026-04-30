@@ -57,12 +57,13 @@ const AdminPayments = () => {
   const filteredRequests = useMemo(() => {
     const list = Array.isArray(requests) ? requests : [];
     const q = query.trim().toLowerCase();
-    const status = statusFilter === "all" ? "" : statusFilter;
-    return list.filter(
-      (r) =>
-        (q ? `${r.user.email} ${r.user.company_name || ""}`.toLowerCase().includes(q) : true) &&
-        (status ? r.status === status : true)
-    );
+    const status = statusFilter === "all" ? "" : statusFilter.toUpperCase();
+
+    return list.filter((r) => {
+      const matchesQuery = q ? `${r.user.email} ${r.user.company_name || ""}`.toLowerCase().includes(q) : true;
+      const matchesStatus = status ? (r.status || "").toUpperCase() === status : true;
+      return matchesQuery && matchesStatus;
+    });
   }, [requests, query, statusFilter]);
 
   const getStatusVariant = (status: string) => {
@@ -242,7 +243,18 @@ const AdminPayments = () => {
                 {selectedRequest.user.region && (
                   <div className="space-y-1">
                     <div className="text-xs text-muted-foreground">Region</div>
-                    <div className="text-sm">{selectedRequest.user.region}</div>
+                    <div className="text-sm">
+                      {typeof selectedRequest.user.region === "string"
+                        ? selectedRequest.user.region
+                        : [
+                            (selectedRequest.user.region as any)?.country,
+                            (selectedRequest.user.region as any)?.state,
+                            (selectedRequest.user.region as any)?.city,
+                            (selectedRequest.user.region as any)?.postalCode,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "—"}
+                    </div>
                   </div>
                 )}
 
