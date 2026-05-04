@@ -5,6 +5,7 @@ export const ALLOWED_STATUSES = [
   "rejected",
   "pending",
   "banned",
+  "deleted",
 ] as const;
 export type AllowedStatus = (typeof ALLOWED_STATUSES)[number];
 

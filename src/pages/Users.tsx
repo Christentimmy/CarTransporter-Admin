@@ -39,7 +39,7 @@ import {
 const getStatusVariant = (status?: string) => {
   const s = (status || "").toLowerCase();
   if (s === "approved") return "secondary";
-  if (s === "rejected" || s === "blocked") return "destructive";
+  if (s === "rejected" || s === "blocked" || s === "deleted") return "destructive";
   return "outline";
 };
 
