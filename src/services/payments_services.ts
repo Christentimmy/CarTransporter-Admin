@@ -85,7 +85,7 @@ export const paymentsService = {
 
   async updateWithdrawalStatus(
     withdrawalRequestId: string,
-    status: "PENDING" | "PAID" | "CANCELLED",
+    status: "pending" | "approved" | "rejected",
   ): Promise<void> {
     const res = await fetch(API_ENDPOINTS.ADMIN.UPDATE_WITHDRAWAL_STATUS, {
       method: "POST",

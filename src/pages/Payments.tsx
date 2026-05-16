@@ -26,7 +26,7 @@ const AdminPayments = () => {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedRequest, setSelectedRequest] = useState<WithdrawalRequest | null>(null);
-
+  const [updatingAction, setUpdatingAction] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const {
@@ -43,14 +43,20 @@ const AdminPayments = () => {
   const pagination = requestsData?.pagination;
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ requestId, status }: { requestId: string; status: "PENDING" | "PAID" | "CANCELLED" }) =>
+    mutationFn: ({ requestId, status }: { requestId: string; status: "pending" | "approved" | "rejected" }) =>
       paymentsService.updateWithdrawalStatus(requestId, status),
+    onMutate: ({ status }) => {
+      setUpdatingAction(status);
+    },
     onSuccess: () => {
       setSelectedRequest(null);
       queryClient.invalidateQueries({ queryKey: ["admin", "withdrawal-requests"] });
     },
     onError: (err) => {
       console.error("Failed to update withdrawal status:", err);
+    },
+    onSettled: () => {
+      setUpdatingAction(null);
     },
   });
 
@@ -337,6 +343,32 @@ const AdminPayments = () => {
                   </div>
                 )}
               </div>
+
+              {selectedRequest.status === "pending" && (
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => updateStatusMutation.mutate({ requestId: selectedRequest._id, status: "approved" })}
+                    disabled={updateStatusMutation.isPending}
+                    className="flex-1"
+                  >
+                    {updatingAction === "approved" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Mark as Paid
+                  </Button>
+                  <Button
+                    onClick={() => updateStatusMutation.mutate({ requestId: selectedRequest._id, status: "rejected" })}
+                    disabled={updateStatusMutation.isPending}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    {updatingAction === "rejected" ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Cancel Request
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
