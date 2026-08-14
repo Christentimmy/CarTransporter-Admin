@@ -45,7 +45,7 @@ export const adminService = {
     full_name: string;
     email: string;
     password: string;
-  }): Promise<void> {
+  }): Promise<{ accessToken: string; refreshToken: string }> {
     const res = await fetch(API_ENDPOINTS.ADMIN.REGISTER_ADMIN, {
       method: "POST",
       headers: {
@@ -60,5 +60,15 @@ export const adminService = {
       const message = data?.message || "Failed to register admin";
       throw new Error(message);
     }
+
+    const data = await res.json();
+    const { accessToken, refreshToken } = data;
+    
+    if (accessToken && refreshToken) {
+      const { storeAuthTokens } = await import("@/config/api");
+      storeAuthTokens(accessToken, refreshToken);
+    }
+
+    return { accessToken, refreshToken };
   },
 };

@@ -3,6 +3,10 @@ import {
   getAuthToken,
   removeAuthToken,
   storeAuthToken,
+  getAccessToken,
+  getRefreshToken,
+  storeAuthTokens,
+  removeAuthTokens,
 } from "@/config/api";
 
 type LoginPayload = {
@@ -12,7 +16,9 @@ type LoginPayload = {
 
 type LoginResponse = {
   message?: string;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn?: number;
   role?: string;
   userId?: string;
 };
@@ -27,7 +33,8 @@ export const authService = {
       body: JSON.stringify(payload),
     });
 
-    let data: LoginResponse | undefined;
+
+    let data: LoginResponse | undefined;   
     try {
       data = (await res.json()) as LoginResponse;
     } catch {
@@ -39,21 +46,21 @@ export const authService = {
       throw new Error(message);
     }
 
-    const token = data?.token;
-    if (!token) {
-      throw new Error("Login failed");
+    const { accessToken, refreshToken } = data || {};
+    if (!accessToken || !refreshToken) {
+      throw new Error("Login failed - missing tokens");
     }
 
-    storeAuthToken(token);
-    return token;
+    storeAuthTokens(accessToken, refreshToken);
+    return accessToken;
   },
 
   isAuthenticated(): boolean {
-    return Boolean(getAuthToken());
+    return Boolean(getAccessToken() || getAuthToken());
   },
 
   logout(): void {
-    removeAuthToken();
+    removeAuthTokens();
   },
 
   getToken(): string | null {
