@@ -77,6 +77,15 @@ const formatDate = (dateStr?: string) => {
   return new Date(dateStr).toLocaleString();
 };
 
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
 const AdminShipments = () => {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -219,7 +228,7 @@ const AdminShipments = () => {
                       {s.currentBid ? (
                         <div className="flex items-center gap-1 text-xs font-medium">
                           <DollarSign className="h-3 w-3" />
-                          ${s.currentBid.amount}
+                          {formatCurrency(s.currentBid.amount)}
                         </div>
                       ) : (
                         <div className="text-xs text-muted-foreground">No bids</div>
@@ -312,7 +321,7 @@ const AdminShipments = () => {
                 </div>
                 <div className="text-right space-y-1">
                   <div className="text-sm font-medium">
-                    {shipmentDetails.shipment.currentBid ? `$${shipmentDetails.shipment.currentBid.amount}` : "No bid"}
+                    {shipmentDetails.shipment.currentBid ? formatCurrency(shipmentDetails.shipment.currentBid.amount) : "No bid"}
                   </div>
                   <div className="text-xs text-muted-foreground">Current Bid</div>
                 </div>
@@ -368,9 +377,15 @@ const AdminShipments = () => {
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-muted-foreground block">Size</span>
-                        <span className="font-medium">
-                          {shipmentDetails.shipment.vehicleDetails.size?.length}×{shipmentDetails.shipment.vehicleDetails.size?.width}×{shipmentDetails.shipment.vehicleDetails.size?.height} in
-                        </span>
+                        {shipmentDetails.shipment.vehicleDetails.size?.length ? (
+                          <span className="font-medium">
+                            L: {shipmentDetails.shipment.vehicleDetails.size.length} in, 
+                            W: {shipmentDetails.shipment.vehicleDetails.size.width} in, 
+                            H: {shipmentDetails.shipment.vehicleDetails.size.height} in
+                          </span>
+                        ) : (
+                          <span className="font-medium">—</span>
+                        )}
                       </div>
                       <div>
                         <span className="text-muted-foreground block">Condition</span>
@@ -406,7 +421,7 @@ const AdminShipments = () => {
                       {shipmentDetails.shipment.shipper.company_name && (
                         <div className="text-xs text-muted-foreground">{shipmentDetails.shipment.shipper.company_name}</div>
                       )}
-                      <div className="text-xs text-green-600 font-medium mt-1">Balance: ${shipmentDetails.shipment.shipper.balance ?? 0}</div>
+                      <div className="text-xs text-green-600 font-medium mt-1">Balance: {formatCurrency(shipmentDetails.shipment.shipper.balance ?? 0)}</div>
                     </div>
                   </div>
                   {shipmentDetails.shipment.assignedTo && (
@@ -422,7 +437,7 @@ const AdminShipments = () => {
                         {shipmentDetails.shipment.assignedTo.company_name && (
                           <div className="text-xs text-muted-foreground">{shipmentDetails.shipment.assignedTo.company_name}</div>
                         )}
-                        <div className="text-xs text-green-600 font-medium mt-1">Balance: ${shipmentDetails.shipment.assignedTo.balance ?? 0}</div>
+                        <div className="text-xs text-green-600 font-medium mt-1">Balance: {formatCurrency(shipmentDetails.shipment.assignedTo.balance ?? 0)}</div>
                       </div>
                     </div>
                   )}
@@ -490,37 +505,37 @@ const AdminShipments = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Bid Amount:</span>
-                          <span className="text-sm font-medium">${shipmentDetails.payment.bidAmount}</span>
+                          <span className="text-sm font-medium">{formatCurrency(shipmentDetails.payment.bidAmount)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Shipper Fee ({shipmentDetails.payment.shipperFeePercent}%):</span>
-                          <span className="text-sm font-medium">${shipmentDetails.payment.shipperFeeAmount}</span>
+                          <span className="text-sm font-medium">{formatCurrency(shipmentDetails.payment.shipperFeeAmount)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Transport Fee ({shipmentDetails.payment.transporterFeePercent}%):</span>
-                          <span className="text-sm font-medium">${shipmentDetails.payment.transporterFeeAmount}</span>
+                          <span className="text-sm font-medium">{formatCurrency(shipmentDetails.payment.transporterFeeAmount)}</span>
                         </div>
                         {shipmentDetails.payment.gstTaxePercent !== undefined && (
                           <div className="flex justify-between">
                             <span className="text-sm">GST Tax ({shipmentDetails.payment.gstTaxePercent}%):</span>
-                            <span className="text-sm font-medium">${shipmentDetails.payment.gstTaxeAmount}</span>
+                            <span className="text-sm font-medium">{formatCurrency(shipmentDetails.payment.gstTaxeAmount)}</span>
                           </div>
                         )}
                         {shipmentDetails.payment.qstTaxePercent !== undefined && (
                           <div className="flex justify-between">
                             <span className="text-sm">QST Tax ({shipmentDetails.payment.qstTaxePercent}%):</span>
-                            <span className="text-sm font-medium">${shipmentDetails.payment.qstTaxeAmount}</span>
+                            <span className="text-sm font-medium">{formatCurrency(shipmentDetails.payment.qstTaxeAmount)}</span>
                           </div>
                         )}
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Total Charged:</span>
-                          <span className="text-sm font-medium text-green-600">${shipmentDetails.payment.totalChargeAmount}</span>
+                          <span className="text-sm font-medium text-green-600">{formatCurrency(shipmentDetails.payment.totalChargeAmount)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Transporter Payout:</span>
-                          <span className="text-sm font-medium text-blue-600">${shipmentDetails.payment.transporterPayoutAmount}</span>
+                          <span className="text-sm font-medium text-blue-600">{formatCurrency(shipmentDetails.payment.transporterPayoutAmount)}</span>
                         </div>
                       </div>
                     </div>
